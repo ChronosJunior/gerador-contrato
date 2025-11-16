@@ -16,5 +16,18 @@ def get_file_id(creds, name, mime_type):
             return
         return items[0]['id']
     except HttpError as error:
-        # TODO(developer) - Handle errors from drive API.
-        print(f"An error occurred: {error}")
+      raise error
+
+def create_folder(creds, name):
+  try:
+    service = build("drive", "v3", credentials=creds)
+    file_metadata = {
+        "name": name,
+        "mimeType": "application/vnd.google-apps.folder",
+    }
+
+    file = service.files().create(body=file_metadata, fields="id").execute()
+    return file.get("id")
+
+  except HttpError as error:
+    raise error
