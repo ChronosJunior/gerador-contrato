@@ -6,10 +6,9 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from drive import get_file_id, create_folder
+from drive import get_file_id, create_folder, move_file_to_folder
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/drive.metadata.readonly", "https://www.googleapis.com/auth/drive.file"]
+SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 def load_credentials():
   creds = None
@@ -23,7 +22,6 @@ def load_credentials():
               "credentials.json", SCOPES
           )
           creds = flow.run_local_server(port=0)
-  # Save the credentials for the next run
       with open("token.json", "w") as token:
           token.write(creds.to_json())
   return creds
@@ -31,21 +29,23 @@ def load_credentials():
 def main():
   creds = load_credentials()
   load_dotenv()
-  file_name, mime_type = os.getenv("FILE_NAME"), os.getenv("MIME_TYPE")
-  if file_name == None or mime_type == None:
+  dir_name, file_name = os.getenv("DIR_NAME"), os.getenv("FILE_NAME")
+  if dir_name == None or file_name == None:
       print("Variáveis de ambiente não encontradas.\nCrie um arquivo .env e configure as variáveis FILE_NAME e MIME_TYPE.")
       return 1
   try:
-      id = get_file_id(creds, file_name, mime_type)
-      if id == None:
-          print(f"Arquivo não encontrado.\nCriando nova pasta com nome {file_name}")
-          id = create_folder(creds, file_name)
-  except HttpError as error:
+      file_id = get_file_id(creds, file_name)
+      if file_id == None:
+        raise Exception("Arquivo não encontrado.")
+      dir_id = get_file_id(creds, dir_name, "application/vnd.google-apps.folder")
+      if dir_id == None:
+        print(f"Pasta não encontrada.\nCriando nova pasta com nome {file_name}")
+        dir_id = create_folder(creds, dir_name)
+      move_file_to_folder(creds, file_id, dir_id)
+      print("Arquivo movido com sucesso!")
+  except (Exception, HttpError) as error:
       print(f"An error occurred: {error}")
       return 2
-  print(id)
-    
-
 
 if __name__ == "__main__":
   main()
