@@ -31,18 +31,18 @@ def main():
   load_dotenv()
   dir_name, file_name = os.getenv("DIR_NAME"), os.getenv("FILE_NAME")
   if dir_name == None or file_name == None:
-      print("Variáveis de ambiente não encontradas.\nCrie um arquivo .env e configure as variáveis FILE_NAME e MIME_TYPE.")
+      print("Environment variables not found.\nCreate a .env file and set the FILE_NAME and DIR_NAME vars.")
       return 1
   try:
       file_id = get_file_id(creds, file_name)
       if file_id == None:
-        raise Exception("Arquivo não encontrado.")
+        raise Exception("File not found.")
       dir_id = get_file_id(creds, dir_name, "application/vnd.google-apps.folder")
       if dir_id == None:
-        print(f"Pasta não encontrada.\nCriando nova pasta com nome {file_name}")
+        print(f"Directory not found.\nCreating a new one with the name: \'{file_name}\'")
         dir_id = create_folder(creds, dir_name)
       move_file_to_folder(creds, file_id, dir_id)
-      print("Arquivo movido com sucesso!")
+      print("The file has been successfully moved to the destination directory!")
   except (Exception, HttpError) as error:
       print(f"An error occurred: {error}")
       return 2
