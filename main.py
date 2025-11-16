@@ -39,7 +39,7 @@ def main():
         raise Exception("File not found.")
       dir_id = get_file_id(creds, dir_name, "application/vnd.google-apps.folder")
       if dir_id == None:
-        print(f"Directory not found.\nCreating a new one with the name: \'{file_name}\'")
+        print(f"Directory not found.\nCreating a new one with the name: \'{dir_name}\'")
         dir_id = create_folder(creds, dir_name)
       move_file_to_folder(creds, file_id, dir_id)
       print("The file has been successfully moved to the destination directory!")
