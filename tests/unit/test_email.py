@@ -15,4 +15,4 @@ def test_send_email(monkeypatch):
 
     monkeypatch.setattr("src.email.connect_smtp_server", mock_smtp)
     addressee, message = "teste@gmail.com", "Contrato de fulano gerado."
-    assert send_email(addressee, message)
+    assert send_email([addressee], message)

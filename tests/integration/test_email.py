@@ -21,4 +21,4 @@ def test_connection_is_active(smtp_server):
     
 def test_send_email_integration(smtp_server):
     sender = os.getenv("SENDER_EMAIL")
-    assert send_email(sender, "Subject: Teste\n\nCorpo do email", smtp_server)
+    assert send_email([sender], "Subject: Teste\n\nCorpo do email", smtp_server)
