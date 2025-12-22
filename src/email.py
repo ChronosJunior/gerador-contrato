@@ -12,7 +12,10 @@ def connect_smtp_server(smtp_server, port, sender_email, sender_pass):
         raise
     return mail_server
 
-def send_email(addressee, message, server=False):
+def send_email(addressees: list[str], message: str, server=None):
+    if not isinstance(addressees, list):
+        raise TypeError(f"Expected list[str] but received {type(addressees).__name__}")
+    
     try:
         if not server:
             load_dotenv()
@@ -23,7 +26,7 @@ def send_email(addressee, message, server=False):
                 "sender_pass": os.getenv("SENDER_PASS")
             }
             server = connect_smtp_server(**config)
-        server.sendmail(os.getenv("SENDER_EMAIL"), addressee, message)
+        server.sendmail(os.getenv("SENDER_EMAIL"), addressees, message)
         server.quit()
         return True 
     except Exception as e:
