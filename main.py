@@ -1,6 +1,8 @@
 import os
+import io
 from datetime import datetime
 
+from googleapiclient.http import MediaIoBaseUpload
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -59,7 +61,6 @@ def autenticar():
     return creds
 
 
-
 def ler_planilha(sheets_service):
     range_ = f"{SHEET_NAME}!A2:O"
     result = sheets_service.spreadsheets().values().get(
@@ -102,7 +103,10 @@ def processar_voluntario(linha, drive, docs):
     for key, value in voluntario.items():
         requests.append({
             "replaceAllText": {
-                "containsText": {"text": f"{{{{{key}}}}}", "matchCase": True},
+                "containsText": {
+                    "text": f"{{{{{key}}}}}",
+                    "matchCase": True
+                },
                 "replaceText": value
             }
         })
@@ -117,7 +121,10 @@ def processar_voluntario(linha, drive, docs):
     for key, value in CONFIG.items():
         requests.append({
             "replaceAllText": {
-                "containsText": {"text": f"{{{{{key}}}}}", "matchCase": True},
+                "containsText": {
+                    "text": f"{{{{{key}}}}}",
+                    "matchCase": True
+                },
                 "replaceText": value
             }
         })
@@ -150,14 +157,19 @@ def processar_voluntario(linha, drive, docs):
         mimeType="application/pdf"
     ).execute()
 
-    caminho_pdf = f"Termo de Voluntariado - {voluntario['NOME']}.pdf"
+    media = MediaIoBaseUpload(
+        io.BytesIO(pdf),
+        mimetype="application/pdf",
+        resumable=False
+    )
 
     drive.files().create(
         body={
-            "name": caminho_pdf,
+            "name": f"Termo de Voluntariado - {voluntario['NOME']}.pdf",
             "parents": [pasta_id]
         },
-        media_body=pdf
+        media_body=media,
+        fields="id"
     ).execute()
 
     drive.files().delete(fileId=doc_id).execute()
@@ -177,7 +189,7 @@ def main():
             continue
         processar_voluntario(linha, drive, docs)
 
-    print("✅ PDFs gerados com sucesso.")
+    print("PDFs gerados com sucesso.")
 
 
 if __name__ == "__main__":
